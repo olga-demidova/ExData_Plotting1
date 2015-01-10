@@ -1,0 +1,12 @@
+install.packages(RSQLite)
+library(RSQLite)
+con <- dbConnect(SQLite(), dbname = "powerconsumption")
+dbWriteTable(con, name="powerconsumption", value="household_power_consumption.txt",  row.names=FALSE, header=TRUE, sep = ";")
+power <- dbGetQuery(con, "SELECT * FROM powerconsumption WHERE Date='1/2/2007' OR Date='2/2/2007'")
+dbDisconnect(con)
+Dates <- as.Date(power$Date, format="%d/%m/%Y")
+Times <- power$Time
+power$DateTime <- as.POSIXct(paste(Dates, Times), format="%Y-%m-%d %H:%M:%S")
+png(filename="plot1.png")
+hist(power$Global_active_power, breaks=12, col="red", main="Global Active Power", xlab="Global Active Power (kilowatts)", ylab="Frequency")
+dev.off()
